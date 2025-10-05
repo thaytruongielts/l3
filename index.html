@@ -1,0 +1,395 @@
+<!-- Chosen Palette: Christmas Frost (Deep Red #B91C1C, Forest Green #166534, Snow White #F9FAFB, Icy Blue #BFDBFE) -->
+<!-- Application Structure Plan: Cấu trúc gồm Header cố định với animation Santa trượt tuyết (CSS Animation), và hai thẻ nội dung chính (Part 1 & Part 2) được căn giữa. Mỗi thẻ chứa kịch bản văn bản và nút kích hoạt TTS riêng biệt. Cấu trúc ưu tiên sự tập trung vào nội dung và chức năng TTS. -->
+<!-- Visualization & Content Choices: Report Info: Kịch bản nghe PET. -> Goal: Luyện nghe phát âm và ngữ điệu. -> Viz/Presentation Method: Văn bản được định dạng rõ ràng, màu sắc chủ đề Giáng Sinh. Sử dụng CSS Animation cho yếu tố "Wow" (Santa). -> Interaction: Nút bấm (Play Audio) sử dụng Vanilla JS để gọi API Gemini TTS và phát âm thanh. -> Justification: TTS là tính năng cốt lõi để biến kịch bản tĩnh thành bài nghe động. -> Library/Method: Vanilla JS + Gemini TTS API. NO SVG/Mermaid. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PET Listening - Merry Practice!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            background-image: linear-gradient(to bottom, #dbeafe, #f0f4f8);
+        }
+        .christmas-card {
+            background-color: #FFFFFF;
+            border: 2px solid #166534;
+            box-shadow: 0 10px 15px -3px rgba(185, 28, 28, 0.5), 0 4px 6px -2px rgba(185, 28, 28, 0.3);
+            transition: transform 0.3s;
+        }
+        .christmas-card:hover {
+            transform: translateY(-5px);
+        }
+        .play-btn {
+            background-color: #B91C1C;
+            transition: all 0.2s;
+        }
+        .play-btn:hover {
+            background-color: #991b1b;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        .speaker-name {
+            font-weight: bold;
+            color: #166534;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        /* Santa Animation CSS */
+        .santa-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 50;
+            background-color: #B91C1C;
+            border-bottom: 4px solid #F9FAFB;
+        }
+        .santa-skiing {
+            position: absolute;
+            font-size: 3rem;
+            line-height: 1;
+            white-space: nowrap;
+            animation: ski-across 20s linear infinite;
+            color: #F9FAFB;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes ski-across {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased pt-[60px]">
+    <!-- Santa Skiing Animation -->
+    <div class="santa-container flex items-center justify-center">
+        <div class="santa-skiing">🎅 Ho Ho Ho! ⛷️ Merry Practice! 🎁 🦌 🎄</div>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl mt-6">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-[#B91C1C]">Luyện Nghe PET Mùa Giáng Sinh</h1>
+            <p class="text-lg text-[#166534] mt-2">Kịch bản Part 1 & Part 2 với Giọng đọc mô phỏng</p>
+        </header>
+
+        <!-- Script Data & TTS Helper Functions -->
+        <script>
+            // Data for TTS and display
+            const part1Script = `1. Woman: Hello, I’d like to confirm the departure time for flight BA255 to Paris, please. Man: Let me check. BA255... Ah, yes. It was scheduled for 16:30, but there's a delay. It's now expected to leave at quarter past three. Woman: Quarter past three? So 15:15, then? Man: No, 15:45, madam. That’s an hour and fifteen minutes later than planned. 
+            
+            2. Man: We had such an amazing holiday! Woman: I remember you said you were going mountain climbing. Was that the best part? Man: The hike was great, but the long, bumpy train journey through the valley was definitely an experience I won't forget. Much better than the short boat trip we took on the lake, which was too crowded. 
+            
+            3. Man: Did you find your car keys? I thought you put them in your handbag this morning. Woman: I thought so too, but they aren't there. And I already checked the kitchen counter where I usually leave them. Wait a moment... Yes! They must have fallen out when I sat down. They were right here, under the magazine next to the sofa. 
+            
+            4. Boy: Mom, I really need something to carry my books for school. This old backpack has holes in it. Woman: Well, we can stop at the sports shop later. I need a new running jacket, but we can look for your bag first. Boy: Actually, could we look at those cool new sports shoes they advertised? My old ones are worn out. Woman: Hmm, okay. Let's start with the shoes, then. 
+            
+            5. Man (Weather reporter): Good evening. After a lovely, sunny day today, expect conditions to change drastically. Tomorrow, we’ll see strong winds arriving early, bringing heavy rain, especially by midday. Temperatures will remain mild, so no chance of snow yet. 
+            
+            6. Woman: Shall we meet up to see the new action movie? Man: Great idea! How about meeting inside the cafe first? It's right next to the cinema entrance on King Street. Woman: Actually, that cafe is always packed. Let's just meet at the entrance. It's easier to find each other there than trying to find a table. Man: Sounds good. See you at the entrance then. 
+            
+            7. Woman: So, what did you decide to do at the summer camp today? Boy: Well, I wanted to join the tennis group, but it was full. They offered me cycling instead. Woman: And? Boy: I decided not to do the cycling in the end. It looks like the pool is free, so I think I’ll go swimming now.`;
+
+            // Formatted for multi-speaker TTS
+            const part2Script = `Interviewer: Welcome back to the show. Today we're joined by Sarah Jenkins, the author of the best-selling fantasy novel, The Cloud Weaver. Sarah, what first inspired you to start writing? Sarah: Well, I’ve always been a big reader, especially of historical novels, but I actually started writing quite late. I used to keep a journal of all the weird and wonderful dreams I had. One of my high school teachers read a few entries and convinced me that I had a unique voice and that I should develop those stories. That was the push I needed. Interviewer: And where do you actually do the writing? Do you need a special environment? Sarah: I used to think I needed a silent study with the perfect view, but that’s impossible these days! I’ve learned to adapt. I can actually block out noise pretty easily. Sometimes, I find the small background buzz of a busy city cafe quite helpful, but mostly I just write at my kitchen table. It doesn't really matter where, as long as I have my laptop. Interviewer: When you start a book, do you plan every chapter meticulously? Sarah: I know many writers plot everything out in advance, like drawing a map. I tried that once, but I found it restricted the story. My process is much more organic. I decide on the beginning and the end, and then I just let my characters start talking. They always take me in directions I never expected. It makes the writing exciting. Interviewer: For young people hoping to follow in your footsteps, what do you see as the biggest hurdle? Sarah: Hmm, it’s not the writing itself, that’s the fun part. And honestly, getting published is hard, but if your work is good, it will happen eventually. I think the real struggle, especially when you’re young, is maintaining the habit. Life is so busy, and it's easy to stop writing for weeks. You must be disciplined to find the time, even if it’s just 30 minutes a day. Interviewer: And finally, what's next? You’ve finished a huge series. How do you feel about starting the next one? Sarah: I’ve got a completely fresh idea—a thriller this time, no fantasy! I’m actually really excited about tackling a different genre. I know there's pressure because the first book was so successful, but I'm trying not to worry about that. I'm focusing on the thrill of the blank page.`;
+
+            // --- TTS Utility Functions (Required for PCM conversion) ---
+
+            const base64ToArrayBuffer = (base64) => {
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                return bytes.buffer;
+            };
+
+            const pcmToWav = (pcm16, sampleRate) => {
+                const numChannels = 1;
+                const bytesPerSample = 2; // Int16
+                const buffer = new ArrayBuffer(44 + pcm16.length * bytesPerSample);
+                const view = new DataView(buffer);
+
+                const writeString = (view, offset, string) => {
+                    for (let i = 0; i < string.length; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                };
+
+                let offset = 0;
+                // RIFF chunk
+                writeString(view, offset, 'RIFF'); offset += 4;
+                view.setUint32(offset, 36 + pcm16.length * bytesPerSample, true); offset += 4;
+                writeString(view, offset, 'WAVE'); offset += 4;
+
+                // FMT chunk
+                writeString(view, offset, 'fmt '); offset += 4;
+                view.setUint32(offset, 16, true); offset += 4; // Sub-chunk size
+                view.setUint16(offset, 1, true); offset += 2; // Audio format (1=PCM)
+                view.setUint16(offset, numChannels, true); offset += 2;
+                view.setUint32(offset, sampleRate, true); offset += 4;
+                view.setUint32(offset, sampleRate * numChannels * bytesPerSample, true); offset += 4; // Byte rate
+                view.setUint16(offset, numChannels * bytesPerSample, true); offset += 2; // Block align
+                view.setUint16(offset, 8 * bytesPerSample, true); offset += 2; // Bits per sample (16)
+
+                // DATA chunk
+                writeString(view, offset, 'data'); offset += 4;
+                view.setUint32(offset, pcm16.length * bytesPerSample, true); offset += 4;
+                
+                // Write PCM data
+                const pcmBytes = new Uint8Array(pcm16.buffer);
+                for (let i = 0; i < pcmBytes.length; i++, offset++) {
+                    view.setUint8(offset, pcmBytes[i]);
+                }
+
+                return new Blob([buffer], { type: 'audio/wav' });
+            };
+
+            // --- TTS Core Function ---
+            
+            let currentAudio = null;
+
+            const updateButtonState = (button, isLoading, isPlaying = false) => {
+                const icon = button.querySelector('span');
+                const loader = button.querySelector('.spinner');
+                
+                if (isLoading) {
+                    icon.classList.add('hidden');
+                    loader.classList.remove('hidden');
+                    button.disabled = true;
+                    button.textContent = button.textContent.replace('Nghe Giọng Đọc', 'Đang tải...');
+                    if (!button.originalText) button.originalText = 'Nghe Giọng Đọc'; 
+                } else {
+                    icon.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                    button.disabled = isPlaying;
+                    button.textContent = isPlaying ? 'Đang phát...' : button.originalText || 'Nghe Giọng Đọc';
+                }
+            };
+
+            const generateAndPlayAudio = async (text, config, buttonId) => {
+                const button = document.getElementById(buttonId);
+                
+                // Stop and reset existing audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+
+                updateButtonState(button, true);
+
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: config
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const MAX_RETRIES = 3;
+                let lastError = null;
+
+                for (let i = 0; i < MAX_RETRIES; i++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const part = result?.candidates?.[0]?.content?.parts?.[0];
+                        const audioData = part?.inlineData?.data;
+                        const mimeType = part?.inlineData?.mimeType;
+
+                        if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                            const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                            const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
+                            
+                            const pcmData = base64ToArrayBuffer(audioData);
+                            const pcm16 = new Int16Array(pcmData);
+                            const wavBlob = pcmToWav(pcm16, sampleRate);
+                            const audioUrl = URL.createObjectURL(wavBlob);
+                            
+                            currentAudio = new Audio(audioUrl);
+                            
+                            currentAudio.onplay = () => updateButtonState(button, false, true);
+                            currentAudio.onended = () => updateButtonState(button, false, false);
+                            currentAudio.onerror = () => {
+                                updateButtonState(button, false, false);
+                                alert("Lỗi phát âm thanh. Vui lòng thử lại.");
+                            };
+                            currentAudio.play();
+                            return; 
+
+                        } else {
+                            throw new Error("Invalid TTS response structure or missing audio data.");
+                        }
+                    } catch (error) {
+                        lastError = error;
+                        if (i < MAX_RETRIES - 1) {
+                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                        }
+                    }
+                }
+                
+                // If loop finishes without success
+                updateButtonState(button, false, false);
+                console.error("Failed to generate and play audio after retries:", lastError);
+                alert("Không thể tạo giọng đọc (Lỗi API hoặc mạng). Vui lòng thử lại sau.");
+            };
+
+            // TTS Callbacks
+            window.playPart1 = () => {
+                const config = {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: "Puck" } // Upbeat voice for short dialogues
+                    }
+                };
+                generateAndPlayAudio(part1Script, config, 'play-part1-btn');
+            };
+
+            window.playPart2 = () => {
+                const config = {
+                    multiSpeakerVoiceConfig: {
+                        speakerVoiceConfigs: [
+                            { speaker: "Interviewer", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }, // Firm voice
+                            { speaker: "Sarah", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Leda" } } }       // Youthful voice
+                        ]
+                    }
+                };
+                generateAndPlayAudio(`TTS the following interview between Interviewer and Sarah: ${part2Script}`, config, 'play-part2-btn');
+            };
+        </script>
+
+
+        <!-- PART 1 Section -->
+        <section class="christmas-card rounded-xl p-6 md:p-8 mb-12">
+            <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200">
+                <h2 class="text-3xl font-bold text-[#B91C1C]">Part 1: Nghe Ngắn (7 Câu)</h2>
+                <button id="play-part1-btn" onclick="playPart1()" class="play-btn text-white font-bold py-3 px-6 rounded-full flex items-center shadow-md hover:shadow-lg">
+                    <span class="mr-2">🎵</span>
+                    <span class="inline">Nghe Giọng Đọc</span>
+                    <div class="spinner hidden ml-2"></div>
+                </button>
+            </div>
+            
+            <p class="text-gray-700 mb-4 font-medium">Đây là kịch bản của 7 đoạn hội thoại ngắn, được đọc bằng giọng Puck (Upbeat).</p>
+
+            <div class="space-y-4 text-sm md:text-base">
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">1. Thời gian bay:</p>
+                    <p><span class="speaker-name">Woman:</span> Hello, I’d like to confirm the departure time for flight BA255 to Paris, please.</p>
+                    <p><span class="speaker-name">Man:</span> Let me check. BA255... Ah, yes. It was scheduled for 16:30, but there's a delay. It's now expected to leave at quarter past three.</p>
+                    <p><span class="speaker-name">Woman:</span> Quarter past three? So 15:15? Not 14:15, then?</p>
+                    <p><span class="speaker-name">Man:</span> No, 15:45, madam. That’s an hour and fifteen minutes later than planned.</p>
+                </div>
+                 <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">2. Phần hành trình:</p>
+                    <p><span class="speaker-name">Man:</span> We had such an amazing holiday!</p>
+                    <p><span class="speaker-name">Woman:</span> I remember you said you were going mountain climbing. Was that the best part?</p>
+                    <p><span class="speaker-name">Man:</span> The hike was great, but the long, bumpy train journey through the valley was definitely an experience I won't forget. Much better than the short boat trip we took on the lake, which was too crowded.</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">3. Chìa khóa xe:</p>
+                    <p><span class="speaker-name">Man:</span> Did you find your car keys? I thought you put them in your handbag this morning.</p>
+                    <p><span class="speaker-name">Woman:</span> I thought so too, but they aren't there. And I already checked the kitchen counter where I usually leave them. Wait a moment... Yes! They must have fallen out when I sat down. They were right here, under the magazine next to the sofa.</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">4. Đồ mua sắm:</p>
+                    <p><span class="speaker-name">Boy:</span> Mom, I really need something to carry my books for school. This old backpack has holes in it.</p>
+                    <p><span class="speaker-name">Woman:</span> Well, we can stop at the sports shop later. I need a new running jacket, but we can look for your bag first.</p>
+                    <p><span class="speaker-name">Boy:</span> Actually, could we look at those cool new sports shoes they advertised? My old ones are worn out.</p>
+                    <p><span class="speaker-name">Woman:</span> Hmm, okay. Let's start with the shoes, then.</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">5. Dự báo thời tiết:</p>
+                    <p><span class="speaker-name">Man (Weather reporter):</span> Good evening. After a lovely, sunny day today, expect conditions to change drastically. Tomorrow, we’ll see strong winds arriving early, bringing heavy rain, especially by midday. Temperatures will remain mild, so no chance of snow yet.</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">6. Địa điểm gặp mặt:</p>
+                    <p><span class="speaker-name">Woman:</span> Shall we meet up to see the new action movie?</p>
+                    <p><span class="speaker-name">Man:</span> Great idea! How about meeting inside the cafe first? It's right next to the cinema entrance on King Street.</p>
+                    <p><span class="speaker-name">Woman:</span> Actually, that cafe is always packed. Let's just meet at the entrance. It's easier to find each other there than trying to find a table.</p>
+                    <p><span class="speaker-name">Man:</span> Sounds good. See you at the entrance then.</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-[#B91C1C]">
+                    <p class="font-bold text-[#166534]">7. Hoạt động bị loại bỏ:</p>
+                    <p><span class="speaker-name">Woman:</span> So, what did you decide to do at the summer camp today?</p>
+                    <p><span class="speaker-name">Boy:</span> Well, I wanted to join the tennis group, but it was full. They offered me cycling instead.</p>
+                    <p><span class="speaker-name">Woman:</span> And?</p>
+                    <p><span class="speaker-name">Boy:</span> I decided not to do the cycling in the end. It looks like the pool is free, so I think I’ll go swimming now.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PART 2 Section -->
+        <section class="christmas-card rounded-xl p-6 md:p-8 mb-12">
+            <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200">
+                <h2 class="text-3xl font-bold text-[#B91C1C]">Part 2: Đối Thoại Dài (Phỏng vấn)</h2>
+                <button id="play-part2-btn" onclick="playPart2()" class="play-btn text-white font-bold py-3 px-6 rounded-full flex items-center shadow-md hover:shadow-lg">
+                    <span class="mr-2">🎙️</span>
+                    <span class="inline">Nghe Giọng Đọc</span>
+                    <div class="spinner hidden ml-2"></div>
+                </button>
+            </div>
+            <p class="text-gray-700 mb-4 font-medium">Đây là kịch bản phỏng vấn dài, được đọc với giọng đa người nói (Interviewer: Kore, Sarah: Leda).</p>
+
+            <div class="space-y-4 text-sm md:text-base p-4 bg-green-50 rounded-lg border-l-4 border-[#166534]">
+                <p><span class="speaker-name">Interviewer:</span> Welcome back to the show. Today we're joined by Sarah Jenkins, the author of the best-selling fantasy novel, The Cloud Weaver. Sarah, what first inspired you to start writing?</p>
+                
+                <p><span class="speaker-name">Sarah:</span> Well, I’ve always been a big reader, especially of historical novels, but I actually started writing quite late. I used to keep a journal of all the weird and wonderful dreams I had. One of my high school teachers read a few entries and convinced me that I had a unique voice and that I should develop those stories. That was the push I needed.</p>
+                
+                <p><span class="speaker-name">Interviewer:</span> And where do you actually do the writing? Do you need a special environment?</p>
+                
+                <p><span class="speaker-name">Sarah:</span> I used to think I needed a silent study with the perfect view, but that’s impossible these days! I’ve learned to adapt. I can actually block out noise pretty easily. Sometimes, I find the small background buzz of a busy city cafe quite helpful, but mostly I just write at my kitchen table. It doesn't really matter where, as long as I have my laptop.</p>
+                
+                <p><span class="speaker-name">Interviewer:</span> When you start a book, do you plan every chapter meticulously?</p>
+                
+                <p><span class="speaker-name">Sarah:</span> I know many writers plot everything out in advance, like drawing a map. I tried that once, but I found it restricted the story. My process is much more organic. I decide on the beginning and the end, and then I just let my characters start talking. They always take me in directions I never expected. It makes the writing exciting.</p>
+                
+                <p><span class="speaker-name">Interviewer:</span> For young people hoping to follow in your footsteps, what do you see as the biggest hurdle?</p>
+                
+                <p><span class="speaker-name">Sarah:</span> Hmm, it’s not the writing itself, that’s the fun part. And honestly, getting published is hard, but if your work is good, it will happen eventually. I think the real struggle, especially when you’re young, is maintaining the habit. Life is so busy, and it's easy to stop writing for weeks. You must be disciplined to find the time, even if it’s just 30 minutes a day.</p>
+                
+                <p><span class="speaker-name">Interviewer:</span> And finally, what's next? You’ve finished a huge series. How do you feel about starting the next one?</p>
+                
+                <p><span class="speaker-name">Sarah:</span> I’ve got a completely fresh idea—a thriller this time, no fantasy! I’m actually really excited about tackling a different genre. I know there's pressure because the first book was so successful, but I'm trying not to worry about that. I'm focusing on the thrill of the blank page.</p>
+            </div>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 pb-4">
+            Chúc bạn Giáng Sinh vui vẻ và ôn thi thành công! 🎄
+        </footer>
+    </div>
+</body>
+</html>
